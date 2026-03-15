@@ -68,7 +68,7 @@ function playStream(url){
 
 // Load live channels from live_channels.json
 function loadLiveChannels(){
-  fetch("live_channels.json")
+  fetch("channels.json")
     .then(res => res.json())
     .then(data => {
       container.innerHTML = ""; // clear existing buttons
