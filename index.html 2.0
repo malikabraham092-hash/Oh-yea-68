@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IPTV Player</title>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#111;
+  color:white;
+  text-align:center;
+  margin:0;
+}
+h1{
+  padding:20px;
+}
+video{
+  margin-top:10px;
+  border-radius:10px;
+}
+#channels{
+  margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  padding:20px;
+}
+button{
+  padding:12px;
+  background:#222;
+  color:white;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+button:hover{
+  background:#444;
+}
+</style>
+
+</head>
+<body>
+
+<h1>My IPTV</h1>
+
+<video id="video" controls width="800"></video>
+
+<div id="channels"></div>
+
+<script>
+const video = document.getElementById("video");
+const container = document.getElementById("channels");
+
+// Play a stream using Hls.js or native HTML5
+function playStream(url){
+  if(Hls.isSupported()){
+    const hls = new Hls();
+    hls.loadSource(url);
+    hls.attachMedia(video);
+  } else {
+    video.src = url;
+  }
+}
+
+// Load live channels from live_channels.json
+function loadLiveChannels(){
+  fetch("live_channels.json")
+    .then(res => res.json())
+    .then(data => {
+      container.innerHTML = ""; // clear existing buttons
+      data.forEach(channel => {
+        const btn = document.createElement("button");
+        btn.textContent = channel.name;
+        btn.onclick = () => playStream(channel.url);
+        container.appendChild(btn);
+      });
+
+      // Auto-play first live channel if nothing is playing
+      if(data.length > 0 && video.src === ""){
+        playStream(data[0].url);
+      }
+    })
+    .catch(err => console.error("Failed to load live channels:", err));
+}
+
+// Initial load
+loadLiveChannels();
+
+// Refresh every 2 minutes (120000 ms)
+setInterval(loadLiveChannels, 120000);
+</script>
+
+</body>
+</html>
